@@ -130,6 +130,43 @@ Graph* createGraph(int h, int w) {
     return new Graph(h, w);
 }
 
+void dfs(Graph* graph, int y, int x) {
+    int dirs[4][2] = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };
+
+    for (int i = 0; i < 4; i++) {
+        int j = rand() % 4;
+        int temp[2] = { dirs[i][0], dirs[i][1] };
+        dirs[i][0] = dirs[j][0];
+        dirs[i][1] = dirs[j][1];
+        dirs[j][0] = temp[0];
+        dirs[j][1] = temp[1];
+    }
+
+    for (int i = 0; i < 4; i++) {
+        int dy = y + dirs[i][0] * 2;
+        int dx = x + dirs[i][1] * 2;
+
+        if (dy >= 0 && dy < graph->height && dx >= 0 && dx < graph->width) {
+            if (graph->g[dy][dx] == 1) {
+                graph->g[y + dirs[i][0]][x + dirs[i][1]] = 0;
+                graph->g[dy][dx] = 0;
+                dfs(graph, dy, dx);
+            }
+        }
+    }
+}
+
+void generateMaze(Graph* graph, int x, int y, int endx, int endy) {
+    for (int i = 0; i < graph->height; i++) {
+        for (int j = 0; j < graph->width; j++) {
+            graph->g[i][j] = 1;
+        }
+    }
+    graph->g[y][x] = 0;
+    dfs(graph, y, x);
+    graph->g[endy][endx] = 0;
+}
+
 void printGraph(Graph* g) {
     for (int i = 0; i < g->width + 2; i++) {
         cout << "■";
@@ -181,10 +218,8 @@ void setBlock(Graph* g, int x1, int y1, int x2, int y2) { //设置阻碍
 void printPath(Graph* graph, vector<Node*> path) {
     for (Node* node : path) {
         graph->g[node->y][node->x] = 2;  // 用 2 标记路径
-        system("CLS");
-        printGraph(graph);
-        Sleep(50);
     }
+    printGraph(graph);
     for (Node* node : path) {
         graph->g[node->y][node->x] = 0;  // 删除路径
     }
@@ -192,26 +227,8 @@ void printPath(Graph* graph, vector<Node*> path) {
 
 int main()
 {
-    Graph* graph = createGraph(15, 23);
-    setBlock(graph, 4, 1, 2, 7);
-    printGraph(graph);
-    printPath(graph, Astar(graph, 0, 0, graph->width - 1, graph->height - 1));
-
-    setBlock(graph, 6, 2, 8, 14);
-    printGraph(graph);
-    printPath(graph, Astar(graph, 0, 0, graph->width - 1, graph->height - 1));
-
-    setBlock(graph, 8, 14, 15, 14);
-    printGraph(graph);
-    printPath(graph, Astar(graph, 0, 0, graph->width - 1, graph->height - 1));
-
-    setBlock(graph, 17, 9, 17, 15);
-    printGraph(graph);
-    printPath(graph, Astar(graph, 0, 0, graph->width - 1, graph->height - 1));
-
-    setBlock(graph, 19, 2, 19, 14);
-    setBlock(graph, 21, 2, 21, 15);
-    printGraph(graph);
+    Graph* graph = createGraph(65, 91);
+    generateMaze(graph, 0, 0, graph->width - 1, graph->height - 1);
     printPath(graph, Astar(graph, 0, 0, graph->width - 1, graph->height - 1));
 
     system("pause");
