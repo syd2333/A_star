@@ -2,9 +2,10 @@
 #include <vector>
 #include <algorithm>
 #include <windows.h>
+#include <time.h>
 
 using namespace std;
-#define MAX_SIZE 100 //迷宫大小
+#define MAX_SIZE 1000 //迷宫大小
 
 struct Graph {
     int g[MAX_SIZE][MAX_SIZE];
@@ -165,32 +166,40 @@ void generateMaze(Graph* graph, int x, int y, int endx, int endy) {
     graph->g[y][x] = 0;
     dfs(graph, y, x);
     graph->g[endy][endx] = 0;
+
+    for (int i = 0; i < graph->height; i++) {
+        for (int j = 0; j < graph->width; j++) {
+            if (rand() % 10 == 0) {
+                graph->g[i][j] = 0;
+            }
+        }
+    }
 }
 
 void printGraph(Graph* g) {
     for (int i = 0; i < g->width + 2; i++) {
-        cout << "■";
+        cout << "@";
     }
     cout << endl;
     for (int i = 0; i < g->height; i++) {
-        cout << "■";
+        cout << "@";
         for (int j = 0; j < g->width; j++) {
             switch (g->g[i][j]) {
             case 0:
-                cout << "  ";
+                cout << " ";
                 break;
             case 1:
-                cout << "■";
+                cout << "@";
                 break;
             case 2:
-                cout << "○";
+                cout << "·";
                 break;
             }
         }
-        cout << "■" << endl;
+        cout << "@" << endl;
     }
     for (int i = 0; i < g->width + 2; i++) {
-        cout << "■";
+        cout << "@";
     }
     cout << endl;
 }
@@ -207,7 +216,7 @@ void setBlock(Graph* g, int x1, int y1, int x2, int y2) { //设置阻碍
         y1 = y2;
         y2 = temp;
     }
-    
+
     for (int i = 0; i < y2 - y1 + 1; i++) {
         for (int j = 0; j < x2 - x1 + 1; j++) {
             g->g[y1 + i - 1][x1 + j - 1] = 1;
@@ -225,13 +234,25 @@ void printPath(Graph* graph, vector<Node*> path) {
     }
 }
 
-int main()
-{
-    Graph* graph = createGraph(65, 91);
-    generateMaze(graph, 0, 0, graph->width - 1, graph->height - 1);
-    printPath(graph, Astar(graph, 0, 0, graph->width - 1, graph->height - 1));
-
+void run(int height, int width, int startX, int startY, int endX, int endY) {
+    Graph* graph = createGraph(height, width);
+    generateMaze(graph, startX, startY, endX, endY);
+    printPath(graph, Astar(graph, startX, startY, endX, endY));
     system("pause");
-    return 0;
 }
 
+int main() {
+    srand(time(NULL));
+    int h, w, sX, sY, eX, eY;
+
+
+    cout << "依次输入地图的高度和宽度(需要是奇数)：";
+    cin >> h >> w;
+    cout << "依次输入迷宫起点的列数和行数(例如第一行第一列为：1 1)：";
+    cin >> sX >> sY;
+    cout << "依次输入迷宫终点的列数和行数：";
+    cin >> eX >> eY;
+
+    run(h, w, sX - 1, sY - 1, eX - 1, eY - 1);
+    return 0;
+}
